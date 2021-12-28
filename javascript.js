@@ -3,8 +3,9 @@ let yScale;
 let svg;
 let legendSvg;
 let legendXScale;
-let legendX;
 const monthArray = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+const tempArray = [2.8, 3.9, 5.0, 6.1, 7.2, 8.3, 9.5, 10.6, 11.7, 12.8]
+const tempDisplayArr = [2.8, 3.9, 5.0, 6.1, 7.2, 8.3, 9.5, 10.6, 11.7]
 
 const w = 1000;
 const h = 500;
@@ -37,6 +38,29 @@ const tempColor = (data) => {
    } 
 }
 
+const legendColor = (curTemp) => {
+
+    if (curTemp < 3.9) {
+        return '#1420FF';
+    } else if (curTemp < 5.0) {
+        return '#5E66FF';
+    } else if (curTemp < 6.1) {
+        return '#B5B9FF'
+    } else if (curTemp < 7.2) {
+        return '#F2F3FF';
+    } else if (curTemp < 8.3) {
+        return '#FFE8A1';
+    } else if (curTemp < 9.5) {
+        return '#FFAD61';
+    } else if (curTemp < 10.6) {
+        return '#FF9B3D';
+    } else if (curTemp < 11.7) {
+        return '#FF6E3D';
+    } else {
+        return '#FF2200';
+    } 
+}
+
 fetch('https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/global-temperature.json')
      .then(response => response.json())
      .then(function(response) {
@@ -55,13 +79,10 @@ const addSvg = (response) => {
     addScale(response);
 }
 
-const addLegend = () => {
     legendSvg = d3.select('#legend')
                   .append('svg')
-                  .attr('id', 'legendBot')
-                  .attr('w', legendW)
-                  .attr('h', legendH)
-}
+                  .attr('width', legendW)
+                  .attr('height', legendH)
 
 const addScale = (response) => {
 
@@ -73,9 +94,9 @@ const addScale = (response) => {
                .domain(monthArray)
                .range([padding, h - padding]);
 
-    legendXScale = d3.scaleLinear()
-                     .domain(2, 12)
-                     .range(40, legendW);
+    legendXScale = d3.scaleBand()
+                     .domain(tempArray)
+                     .range([padding, legendW - padding]);
     
     addAxis(response);
 }
@@ -83,7 +104,7 @@ const addScale = (response) => {
 const addAxis = (response) => {
     const xAxis = d3.axisBottom(xScale);
     const yAxis = d3.axisLeft(yScale);
-    legendX = d3.axisBottom(legendXScale);
+    const legendX = d3.axisBottom(legendXScale);
 
     svg.append('g')
        .attr('id','x-axis')
@@ -94,6 +115,10 @@ const addAxis = (response) => {
        .attr('id', 'y-axis')
        .attr('transform', `translate(${padding}, 0)`)
        .call(yAxis);
+    
+    legendSvg.append('g')
+             .attr('transform', `translate (0, ${padding})`)
+             .call(legendX.tickFormat(d => d).ticks(12));
     
     addRect(response);
 }
@@ -112,7 +137,16 @@ const addRect = (response) => {
        .attr('data-month', (d) => d.month - 1)
        .attr('data-year', (d) => d.year)
        .attr('data-temp', (d) => d.variance);
+    
+    legendSvg.selectAll('rect')
+             .data(tempDisplayArr)
+             .enter()
+             .append('rect')
+             .attr('x', (d, i) => legendXScale(d) + 20)
+             .attr('fill', (d) => legendColor(d))
+             .attr('y', 39)
+             .attr('width', 35)
+             .attr('height', 20)
 
-    addLegend();
 }
 
