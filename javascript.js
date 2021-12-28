@@ -8,10 +8,34 @@ const h = 500;
 const padding = 60;
 const yScaleHeight = h - padding;
 
+const tempColor = (data) => {
+    const curTemp = 8.66 + data;
+
+   if (curTemp < 3.9) {
+       return '#1420FF';
+   } else if (curTemp < 5.0) {
+       return '#5E66FF';
+   } else if (curTemp < 6.1) {
+       return '#B5B9FF'
+   } else if (curTemp < 7.2) {
+       return '#F2F3FF';
+   } else if (curTemp < 8.3) {
+       return '#FFE8A1';
+   } else if (curTemp < 9.5) {
+       return '#FFAD61';
+   } else if (curTemp < 10.6) {
+       return '#FF9B3D';
+   } else if (curTemp < 11.7) {
+       return '#FF6E3D';
+   } else {
+       return '#FF2200';
+   } 
+}
+
 fetch('https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/global-temperature.json')
      .then(response => response.json())
      .then(function(response) {
-        // console.log(response);
+        console.log(response);
          addSvg(response);
      })
 
@@ -64,4 +88,9 @@ const addRect = (response) => {
        .attr('y', (d, i) => yScale(monthArray[d.month - 1]))
        .attr('width', 3.5)
        .attr('height', 31)
+       .attr('fill', (d) => tempColor(d.variance))
+       .attr('class', 'cell')
+       .attr('data-month', (d) => d.month - 1)
+       .attr('data-year', (d) => d.year)
+       .attr('data-temp', (d) => d.variance)
 }
