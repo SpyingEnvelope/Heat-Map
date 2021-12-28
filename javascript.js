@@ -1,10 +1,15 @@
 let xScale;
 let yScale;
 let svg;
+let legendSvg;
+let legendXScale;
+let legendX;
 const monthArray = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
 const w = 1000;
 const h = 500;
+const legendH = 250;
+const legendW = 500;
 const padding = 60;
 const yScaleHeight = h - padding;
 
@@ -37,6 +42,7 @@ fetch('https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/maste
      .then(function(response) {
         console.log(response);
          addSvg(response);
+         
      })
 
 
@@ -49,6 +55,14 @@ const addSvg = (response) => {
     addScale(response);
 }
 
+const addLegend = () => {
+    legendSvg = d3.select('#legend')
+                  .append('svg')
+                  .attr('id', 'legendBot')
+                  .attr('w', legendW)
+                  .attr('h', legendH)
+}
+
 const addScale = (response) => {
 
     xScale = d3.scaleLinear()
@@ -58,6 +72,10 @@ const addScale = (response) => {
     yScale = d3.scaleBand()
                .domain(monthArray)
                .range([padding, h - padding]);
+
+    legendXScale = d3.scaleLinear()
+                     .domain(2, 12)
+                     .range(40, legendW);
     
     addAxis(response);
 }
@@ -65,6 +83,7 @@ const addScale = (response) => {
 const addAxis = (response) => {
     const xAxis = d3.axisBottom(xScale);
     const yAxis = d3.axisLeft(yScale);
+    legendX = d3.axisBottom(legendXScale);
 
     svg.append('g')
        .attr('id','x-axis')
@@ -92,5 +111,8 @@ const addRect = (response) => {
        .attr('class', 'cell')
        .attr('data-month', (d) => d.month - 1)
        .attr('data-year', (d) => d.year)
-       .attr('data-temp', (d) => d.variance)
+       .attr('data-temp', (d) => d.variance);
+
+    addLegend();
 }
+
