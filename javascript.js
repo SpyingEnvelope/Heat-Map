@@ -1,3 +1,14 @@
+// jQuery
+
+$(document).mousemove(function(event) {
+    $('#tooltip').css('left', event.clientX + 'px')
+    $('#tooltip').css('top', event.clientY - 50 + 'px')
+    if (event.target.classList[0] == null) {
+        $('#tooltip').css('opacity', 0)
+    }
+});
+
+
 let xScale;
 let yScale;
 let svg;
@@ -79,6 +90,12 @@ const addSvg = (response) => {
     addScale(response);
 }
 
+const tooltip = d3.select('#graph-div')
+                  .append('div')
+                  .attr('id', 'tooltip')
+                  .style('position', 'absolute')
+                  .style('opacity', '0')
+
     legendSvg = d3.select('#legend')
                   .append('svg')
                   .attr('width', legendW)
@@ -136,7 +153,14 @@ const addRect = (response) => {
        .attr('class', 'cell')
        .attr('data-month', (d) => d.month - 1)
        .attr('data-year', (d) => d.year)
-       .attr('data-temp', (d) => d.variance);
+       .attr('data-temp', (d) => d.variance)
+       .attr('data-var', function(d)  {
+          const temp = 8.66 - d.variance
+          return temp.toFixed(2)        
+        })
+       .on('mouseover', (event) => tooltip.style('opacity', '1')
+                                          .attr('data-year', event.currentTarget.dataset.year))
+       .on('mousemove', (event) => tooltip.html(`<b>Month:</b> ${monthArray[event.currentTarget.dataset.month]} <br> <b>Temp:</b> ${event.currentTarget.dataset.var} <br> <b>Variance:</b> ${event.currentTarget.dataset.temp}`))
     
     legendSvg.selectAll('rect')
              .data(tempDisplayArr)
